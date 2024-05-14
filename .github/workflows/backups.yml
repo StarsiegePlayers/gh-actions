@@ -1,0 +1,44 @@
+name: Repository Backups
+
+on:
+  schedule:
+    - cron: '0 */1 * * *' # run every hour
+  repository_dispatch:
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        info:
+          - {repo: "open-siege/open-siege", wiki: true, path: "open-siege", map: "starsiegeplayers/open-siege" }
+    steps:
+      - name: "Checkout Mapped Source Tree"
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: ${{matrix.info.map}}
+          token: ${{secrets.SSP_BACKUPS}}
+          path: ${{matrix.info.path}}
+      
+      - name: "Add remote changes"
+        run: |
+          cd ${{matrix.info.path}}
+          git remote add upstream https://github.com/${{matrix.info.repo}}.git
+          git pull upstream
+          git push
+
+      - name: "Checkout Mapped Wiki Tree"
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: ${{matrix.info.map}}.wiki
+          token: ${{secrets.SSP_BACKUPS}}
+          path: ${{matrix.info.path}}.wiki
+
+      - name: "Add wiki changes"
+        if: ${{matrix.info.wiki}}
+        run: |
+          cd ${{matrix.info.path}}.wiki
+          git remote add upstream https://github.com/${{matrix.info.repo}}.wiki.git
+          git pull upstream
+          git push
