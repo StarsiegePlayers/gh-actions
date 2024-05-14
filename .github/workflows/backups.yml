@@ -1,4 +1,4 @@
-name: Repository Backups
+name: Repository Backup
 
 on:
   schedule:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         info:
-          - {repo: "open-siege/open-siege", wiki: true, path: "open-siege", map: "starsiegeplayers/open-siege" }
+          - {repo: "open-siege/open-siege", branch: "master", wiki: true, path: "open-siege", map: "starsiegeplayers/open-siege" }
     steps:
       - name: "Checkout Mapped Source Tree"
         uses: actions/checkout@v4.1.1
@@ -25,7 +25,7 @@ jobs:
         run: |
           cd ${{matrix.info.path}}
           git remote add upstream https://github.com/${{matrix.info.repo}}.git
-          git pull upstream
+          git pull upstream ${{matrix.info.branch}}
           git push
 
       - name: "Checkout Mapped Wiki Tree"
@@ -40,5 +40,5 @@ jobs:
         run: |
           cd ${{matrix.info.path}}.wiki
           git remote add upstream https://github.com/${{matrix.info.repo}}.wiki.git
-          git pull upstream
+          git pull upstream ${{matrix.info.branch}}
           git push
